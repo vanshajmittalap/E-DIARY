@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import './Sign.css';
 
 const Signup = (props) => {
   const [credentials, setCredentials] = useState({
     name: "",
     email: "",
     password: "",
-    cpassword: "",
+    mobile: "",
   });
   let history = useHistory();
   const handleSubmit = async (e) => {
@@ -16,14 +17,14 @@ const Signup = (props) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: credentials.name, email: credentials.email, password: credentials.password }),
+      body: JSON.stringify({ name: credentials.name, email: credentials.email, password: credentials.password, mobile: credentials.mobile }),
     });
     const json = await response.json();
     console.log(json);
     if (json.success) {
       // Save the auth token and redirect
       localStorage.setItem("token", json.authtoken);
-      history.push("/");
+      history.push("/verify");
       props.showAlert("ACCOUNT CREATED SUCCESSFULLY", "success")
     } else {
       props.showAlert("INVALID CREDENTIALS", "danger")
@@ -34,18 +35,19 @@ const Signup = (props) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
   let myStyle1 = {
-    color: (props.mode==='dark' || props.mode==='primary' || props.mode==='success')?'white':'#000066',
+    color:'rgb(240, 10, 71)',
     fontFamily: 'fantasy'
 }
 let myStyle2 = {
-    color: (props.mode==='dark' || props.mode==='primary' || props.mode==='success')?'white':'black',
+    color:'white',
     fontFamily: 'cursive'
 }
 
   return (
+    <div className="con">
     <div className="container mt-2">
-      <h1 style={myStyle1}>CREATE AN ACCOUNT TO CONTINUE</h1>
       <form onSubmit={handleSubmit}>
+      <h1 style={{color:'rgb(240, 10, 71)', fontFamily:'fantasy', marginLeft:'25%'}}>CREATE AN ACCOUNT TO CONTINUE</h1>
         <div className="mb-3">
           <label htmlFor="name" className="form-label" style={myStyle2}>
             Name
@@ -93,24 +95,24 @@ let myStyle2 = {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="cpassword" className="form-label" style={myStyle2}>
-            Confirm Password
+          <label htmlFor="mobile" className="form-label" style={myStyle2}>
+            Mobile Number
           </label>
           <input
-            type="password"
+            type="tel"
             className="form-control"
-            id="cpassword"
-            name="cpassword"
+            id="mobile"
+            name="mobile"
             style={{backgroundColor: 'rgb(36 74 104)', color:'#fd7e14', fontFamily:'cursive'}}
             onChange={onChange}
             minLength={5}
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary" style={{backgroundColor:'#0000cc'}}>
-          SIGN UP
-        </button>
+        <button type="submit" className="btn btn-primary" style={{backgroundColor:'rgb(240, 10, 71)', marginLeft:'42%'}}>SIGN UP</button>
+        <Link className="btn btn-primary mx-1" to="/login" role="button">Login</Link>
       </form>
+    </div>
     </div>
   );
 };

@@ -15,10 +15,22 @@ const UserSchema = new Schema({
         type: String,
         required: true
     },
+    mobile:{
+        type: Number,
+        required: true
+    },
     date:{
         type: Date,
         default: Date.now
     },
+    otp:{
+        type: Number,
+        required: true
+    },
+    mobotp:{
+        type: Number,
+        required: true
+    }
   });
   const User = mongoose.model('user', UserSchema);
   module.exports = User;

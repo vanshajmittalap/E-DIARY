@@ -5,8 +5,8 @@ const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var fetchuser = require('../middleware/fetchuser');
-
-const JWT_SECRET = 'Harryisagoodb$oy';
+var fast2sms = require('fast-two-sms')
+const JWT_SECRET = 'VanshajAuth';
 
 // ROUTE 1: Create a User using: POST "/api/auth/createuser". No login required
 router.post('/createuser', [
@@ -28,12 +28,18 @@ router.post('/createuser', [
     }
     const salt = await bcrypt.genSalt(10);
     const secPass = await bcrypt.hash(req.body.password, salt);
-
+    let otpval = Math.floor((Math.random()*10000)+1);
+    let mobotpval = Math.floor((Math.random()*10000)+1);
+    mailsender(req.body.email, otpval);
+    smssender(req.body.mobile, mobotpval);
     // Create a new user
     user = await User.create({
       name: req.body.name,
       password: secPass,
       email: req.body.email,
+      mobile: req.body.mobile,
+      otp: otpval,
+      mobotp: mobotpval
     });
     const data = {
       user: {
@@ -52,7 +58,50 @@ router.post('/createuser', [
     res.status(500).send("Internal Server Error");
   }
 })
+// Nodemailer
+const mailsender = (email, otp)=>{
+  var nodemailer = require('nodemailer');
 
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'bigboss.1995b@gmail.com',
+      pass: 'Bigb@123'
+    }
+  });
+
+  var mailOptions = {
+    from: 'bigboss.1995b@gmail.com',
+    to: `${email}`,
+    subject: 'This is Your OTP for Email Verification',
+    text: `OTP: ${otp}`
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
+
+// Fast2SMS
+const smssender = (mobile, mobotp)=>{
+  var options = {
+    authorization: "WBJVS9esgFEcRfvPuxTCAwylKZdIGDLz3kirYmtoQ5a1hX0qOpHPpM35SY4QRteB9KAlhJuwL2XNZxgW",
+    message: `OTP: ${mobotp}`,
+    numbers: [`${mobile}`],
+  };
+
+  fast2sms.sendMessage(options)
+  .then((response) => {
+      console.log("SMS OTP Code Sent Successfully")
+    })
+    .catch((error) => {
+      console.log("Some error taken place")
+    });
+}
 
 // ROUTE 2: Authenticate a User using: POST "/api/auth/login". No login required
 router.post('/login', [
@@ -96,9 +145,45 @@ router.post('/login', [
 
 
 });
+// Route 3:
+router.post('/verify',[body('email', 'Enter a valid email').isEmail(),
+ body('otp', 'OTP cannot be blank').exists(),
+ body('mobotp', 'OTP cannot be blank').exists()],  async (req, res) => {
+  let success = false;
+  // If there are errors, return Bad request and the errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
+  const { email, otp, mobotp } = req.body;
+  try {
+    let user = await User.findOne({ email });
+    if (!user) {
+      success = false
+      return res.status(400).json({ error: "Please try to login with correct credentials" });
+    }
+    if (user.otp!=otp || user.mobotp!=mobotp) {
+      success = false
+      return res.status(400).json({ success, error: "Please try to enter correct otp" });
+    }
 
-// ROUTE 3: Get loggedin User Details using: POST "/api/auth/getuser". Login required
+    const data = {
+      user: {
+        id: user.id
+      }
+    }
+    const authtoken = jwt.sign(data, JWT_SECRET);
+    success = true;
+    res.json({ success, authtoken })
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+})
+
+// ROUTE : 
 router.post('/getuser', fetchuser,  async (req, res) => {
 
   try {

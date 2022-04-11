@@ -1,5 +1,6 @@
 import React, {useState} from 'react'
-import { useHistory } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
+import './Sign.css';
 
 
 const Login = (props) => {
@@ -32,18 +33,19 @@ const Login = (props) => {
         setCredentials({...credentials, [e.target.name]: e.target.value})
     }
     let myStyle1 = {
-        color: (props.mode==='dark' || props.mode==='primary' || props.mode==='success')?'white':'#000066',
+        color:'rgb(240, 10, 71)',
         fontFamily: 'fantasy'
     }
     let myStyle2 = {
-        color: (props.mode==='dark' || props.mode==='primary' || props.mode==='success')?'white':'black',
+        color:'white',
         fontFamily: 'cursive'
     }
 
     return (
-        <div className="mt-3">
-            <h1 style={myStyle1}>LOGIN TO CONTINUE</h1>
+        <div className="con" style={{marginTop: '10%'}}>
+        <div className="container mt-3" >
             <form  onSubmit={handleSubmit}>
+            <h1 style={{color:'rgb(240, 10, 71)', fontFamily:'fantasy', marginLeft:'35%'}}>LOGIN TO CONTINUE</h1>
                 <div className="mb-3">
                     <label htmlFor="email" className="form-label" style={myStyle2}>Email Address</label>
                     <input type="email" style={{backgroundColor: 'rgb(36 74 104)', color:'#fd7e14', fontFamily:'cursive'}} className="form-control" value={credentials.email} onChange={onChange} id="email" name="email" aria-describedby="emailHelp" />
@@ -54,8 +56,10 @@ const Login = (props) => {
                     <input type="password" style={{backgroundColor: 'rgb(36 74 104)', color:'#fd7e14', fontFamily:'cursive'}} className="form-control" value={credentials.password} onChange={onChange} name="password" id="password" />
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{backgroundColor:'#0000cc'}}>LOGIN</button>
+                <button type="submit" className="btn btn-primary" style={{backgroundColor:'rgb(240, 10, 71)', marginLeft:'42%'}}>LOGIN</button>
+                <Link className="btn btn-primary mx-1" to="/signup" role="button">Signup</Link>
             </form>
+        </div>
         </div>
     )
 }
